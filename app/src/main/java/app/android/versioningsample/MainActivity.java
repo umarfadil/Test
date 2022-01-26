@@ -2,8 +2,12 @@ package app.android.versioningsample;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -16,11 +20,14 @@ import com.androidnetworking.interfaces.JSONObjectRequestListener;
 
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
     String versionCode = null;
     TextView tvVersion;
     String API_VERSION = "https://raw.githubusercontent.com/umarfadil/Test/master/app/src/main/assets/checkVersion.json";
+    String urlApps = "https://play.google.com/store/apps/details?id=irs.mobile.app.mdnreload2";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +55,29 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("Response", response.toString());
-                        JSONObject androidVersion = response.optJSONObject("data").optJSONObject("versioName");
+                        String androidVersion = Objects.requireNonNull(response.optJSONObject("data")).optString("versionName");
                         if (versionCode.equals(androidVersion) ) {
-                            Toast.makeText(getApplicationContext(), "Versi android sama", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Versi android sama", Toast.LENGTH_SHORT).show();
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setMessage("Aplikasi Anda Uptodate.")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Oke", null)
+                                    .show();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Versi ANdroid tidak sama", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Versi ANdroid tidak sama", Toast.LENGTH_SHORT).show();
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setMessage("Silahkan Update aplikasi kamu ke Versi " + androidVersion.toString())
+                                    .setCancelable(false)
+                                    .setPositiveButton("Update Aplikasi", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int id) {
+                                            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(urlApps));
+                                            startActivity(i);
+                                            finish();
+                                        }
+                                    })
+                                    .setCancelable(false)
+                                    .show();
                         }
                         //Toast.makeText(getApplicationContext(), "response -> " + response.toString(), Toast.LENGTH_SHORT).show();
                     }
